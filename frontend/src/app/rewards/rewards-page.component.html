@@ -1,0 +1,89 @@
+<div class="page">
+
+  <header class="page-header">
+    <h1>PointBox</h1>
+    <p class="subtitle">Plataforma de canje de puntos</p>
+  </header>
+
+  <div class="toolbar">
+    <app-customer-selector
+      [customers]="customers()"
+      [selectedId]="selectedCustomerId()"
+      (customerSelected)="onCustomerSelected($event)"
+    />
+    <app-wallet-summary [wallet]="wallet()" />
+  </div>
+
+  @if (lastClaimCode()) {
+    <div class="claim-success">
+      Código generado: <strong>{{ lastClaimCode() }}</strong>
+    </div>
+  }
+
+  @if (lastError()) {
+    <div class="claim-error">{{ lastError() }}</div>
+  }
+
+  <div class="content">
+
+    <section class="rewards-section">
+      <h2>Recompensas disponibles</h2>
+
+      @if (isLoadingRewards()) {
+        <p class="loading">Cargando recompensas...</p>
+      } @else if (rewards().length === 0) {
+        <p class="empty-state">No hay recompensas disponibles.</p>
+      } @else {
+        <div class="rewards-grid">
+          @for (reward of rewards(); track reward.id) {
+            <div class="reward-card" [class.unavailable]="!isRewardAvailable(reward)">
+
+              <div class="reward-header">
+                <span class="reward-name">{{ reward.name }}</span>
+                <span class="reward-merchant">{{ reward.merchant.name }}</span>
+              </div>
+
+              <div class="reward-meta">
+                <span class="reward-cost">{{ reward.pointCost | number }} pts</span>
+                <span class="reward-stock">Stock: {{ reward.stock }}</span>
+              </div>
+
+              <div class="reward-badges">
+                @if (reward.status !== 'ACTIVE') {
+                  <span class="badge badge-status">{{ reward.status }}</span>
+                }
+                @if (reward.merchant.status === 'INACTIVE') {
+                  <span class="badge badge-inactive">Empresa inactiva</span>
+                }
+                @if (reward.stock === 0) {
+                  <span class="badge badge-nostock">Sin stock</span>
+                }
+              </div>
+
+              <button
+                class="btn-claim"
+                [disabled]="!selectedCustomerId() || !isRewardAvailable(reward) || isClaiming()"
+                (click)="handleClaim(reward)"
+              >
+                {{ isClaiming() ? 'Procesando...' : 'Canjear' }}
+              </button>
+
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    @if (selectedCustomerId()) {
+      <aside class="sidebar">
+        @if (isLoadingClaims()) {
+          <p class="loading">Cargando canjes...</p>
+        } @else {
+          <app-claims-list [claims]="claims()" />
+        }
+      </aside>
+    }
+
+  </div>
+
+</div>

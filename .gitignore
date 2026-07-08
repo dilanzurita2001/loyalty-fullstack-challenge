@@ -1,0 +1,31 @@
+# Node
+node_modules/
+npm-debug.log*
+.npm
+
+# Build outputs
+dist/
+out-tsc/
+coverage/
+
+# Env
+.env
+*.env.local
+
+# Docker volumes
+postgres_data/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo

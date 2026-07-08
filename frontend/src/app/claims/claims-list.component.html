@@ -1,0 +1,19 @@
+<section class="claims-section">
+  <h3>Canjes realizados</h3>
+
+  @if (claims().length === 0) {
+    <p class="empty-state">Sin canjes aún.</p>
+  } @else {
+    <ul class="claims-list">
+      @for (claim of claims(); track claim.id) {
+        <li class="claim-item">
+          <div class="claim-code">{{ claim.promoCode }}</div>
+          <div class="claim-info">
+            <span class="claim-reward">{{ claim.rewardName }}</span>
+            <span class="claim-points">-{{ claim.pointsDebited }} pts</span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

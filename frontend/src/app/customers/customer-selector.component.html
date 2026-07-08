@@ -1,0 +1,14 @@
+<div class="selector-wrapper">
+  <label for="customer-select">Cliente</label>
+  <select id="customer-select" [value]="selectedId() ?? ''" (change)="onSelect($event)">
+    <option value="" disabled>— Seleccionar cliente —</option>
+    @for (customer of customers(); track customer.id) {
+      <option [value]="customer.id">
+        {{ customer.name }}
+        @if (customer.status === 'BLOCKED') {
+          (Bloqueado)
+        }
+      </option>
+    }
+  </select>
+</div>

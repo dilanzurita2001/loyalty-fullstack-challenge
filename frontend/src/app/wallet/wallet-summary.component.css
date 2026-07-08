@@ -1,0 +1,30 @@
+.wallet-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #6c63ff;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 10px;
+  min-width: 160px;
+}
+
+.wallet-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.8;
+}
+
+.wallet-balance {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.wallet-empty {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  font-style: italic;
+}

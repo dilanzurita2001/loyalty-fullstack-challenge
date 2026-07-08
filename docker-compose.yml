@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pointbox-postgres
+    environment:
+      POSTGRES_USER: pointbox
+      POSTGRES_PASSWORD: pointbox
+      POSTGRES_DB: pointbox
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pointbox']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pointbox-backend
+    environment:
+      DATABASE_URL: postgres://pointbox:pointbox@postgres:5432/pointbox
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pointbox-frontend
+    ports:
+      - '4200:80'
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

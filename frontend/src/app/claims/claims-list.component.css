@@ -1,0 +1,57 @@
+.claims-section h3 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.empty-state {
+  color: #999;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.claims-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.claim-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.claim-code {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  background: #f0eeff;
+  color: #6c63ff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.claim-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.claim-reward {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.claim-points {
+  font-size: 0.8rem;
+  color: #e74c3c;
+  font-weight: 600;
+}

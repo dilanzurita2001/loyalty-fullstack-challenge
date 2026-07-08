@@ -1,0 +1,8 @@
+<div class="wallet-card">
+  <span class="wallet-label">Saldo disponible</span>
+  @if (wallet()) {
+    <span class="wallet-balance">{{ wallet()!.balance | number }} pts</span>
+  } @else {
+    <span class="wallet-empty">Selecciona un cliente</span>
+  }
+</div>
