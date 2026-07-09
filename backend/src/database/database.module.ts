@@ -20,5 +20,6 @@ import { SeedService } from './seeds/seed.service';
     }),
   ],
   providers: [SeedService],
+  exports: [TypeOrmModule],
 })
 export class DatabaseModule {}
