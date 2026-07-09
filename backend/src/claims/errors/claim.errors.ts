@@ -1,9 +1,9 @@
 export class ClaimError extends Error {
   constructor(
     public readonly code: string,
-    message: string,
+    public readonly userMessage: string,
   ) {
-    super(message);
+    super(code);
     this.name = 'ClaimError';
   }
 }
@@ -23,4 +23,10 @@ export const ClaimErrors = {
 
   INSUFFICIENT_POINTS: () =>
     new ClaimError('INSUFFICIENT_POINTS', 'The customer does not have enough points.'),
+
+  IDEMPOTENCY_KEY_CONFLICT: () =>
+    new ClaimError(
+      'IDEMPOTENCY_KEY_CONFLICT',
+      'This idempotency key was already used for a different claim.',
+    ),
 };

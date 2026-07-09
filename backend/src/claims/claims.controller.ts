@@ -21,17 +21,11 @@ export class ClaimsController {
       return await this.claimsService.createClaim(dto);
     } catch (error) {
       if (error instanceof ClaimError) {
-        throw new HttpException(
-          { error: error.code, message: error.message },
-          HttpStatus.UNPROCESSABLE_ENTITY,
-        );
-      }
-
-      if (error?.message === 'NOT_IMPLEMENTED') {
-        throw new HttpException(
-          { error: 'NOT_IMPLEMENTED', message: 'Not implemented.' },
-          HttpStatus.NOT_IMPLEMENTED,
-        );
+        const status =
+          error.code === 'IDEMPOTENCY_KEY_CONFLICT'
+            ? HttpStatus.CONFLICT
+            : HttpStatus.UNPROCESSABLE_ENTITY;
+        throw new HttpException({ error: error.code, message: error.userMessage }, status);
       }
 
       throw error;
