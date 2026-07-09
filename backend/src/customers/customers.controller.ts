@@ -1,8 +1,10 @@
 import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CustomersService } from './customers.service';
 import { WalletService } from '../wallet/wallet.service';
 import { ClaimsService } from '../claims/claims.service';
 
+@ApiTags('customers')
 @Controller('customers')
 export class CustomersController {
   constructor(
