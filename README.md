@@ -99,9 +99,9 @@ backend/test/claim-reward.spec.ts                      ← tests que deben pasar
 
 El enunciado completo de la prueba está en [CHALLENGE.md](./CHALLENGE.md).
 
-### Decisiones técnicas tomadas
+# Decisiones técnicas tomadas
 
-# DTP-01 — Persistencia de saldo
+### DTP-01 — Persistencia de saldo
 
 La decisión fue no almacenar el saldo como una columna en la base de datos, sino calcularlo siempre a partir de los movimientos registrados en WalletLedger. De esta forma, el ledger se convierte en la única fuente de verdad, garantizando que el saldo siempre sea consistente con el historial de transacciones.
 
@@ -109,7 +109,7 @@ Para lograrlo, cada movimiento se almacena con un valor firmado: los CREDIT se r
 
 El scaffold original realizaba dos consultas separadas (sumar créditos y sumar débitos para luego restarlos). Se cambió este enfoque porque una única suma es más simple, representa el estado del ledger en un solo momento, y sigue el patrón utilizado en sistemas contables, donde el saldo siempre se obtiene como la suma de todos los movimientos registrados.
 
-# DTP-02 — Idempotencia
+### DTP-02 — Idempotencia
 
 La estrategia se basó en dos capas de protección, pensando tanto en el caso normal como en el caso extremo.
 
@@ -119,7 +119,7 @@ La segunda capa es la que realmente garantiza la idempotencia ante una condició
 
 Como medida adicional, si el idempotencyKey ya existe pero pertenece a un cliente distinto, la operación se rechaza como un conflicto, evitando que un cliente pueda reutilizar o ver el código promocional de otro.
 
-# DTP-03 — Concurrencia
+### DTP-03 — Concurrencia
 
 El mayor riesgo de este flujo es que dos solicitudes concurrentes terminen aprobando canjes que, sumados, dejen el saldo o el stock en negativo. Para evitarlo, las validaciones de negocio (cliente activo, empresa activa, recompensa activa, stock, saldo) se ejecutan primero sin bloquear nada — esto actúa como un filtro rápido para descartar solicitudes inválidas sin pagar el costo de abrir una transacción.
 
@@ -127,13 +127,13 @@ Solo cuando esas validaciones iniciales pasan se abre una transacción que toma 
 
 Una vez dentro de la transacción, con el bloqueo ya tomado, se vuelve a validar stock y saldo con datos frescos. Esta segunda validación es la que realmente previene la condición de carrera: si dos solicitudes llegan al mismo tiempo, la segunda queda esperando a que la primera termine (confirme o revierta) antes de poder leer el estado actualizado, por lo que nunca actúa sobre datos obsoletos.
 
-# DTP-04 — Generación de código promocional
+### DTP-04 — Generación de código promocional
 
 El objetivo era que el código fuera único, no secuencial ni predecible, y fácil de leer para un humano. Por eso se generan códigos aleatorios de 8 caracteres a partir de un alfabeto reducido que excluye caracteres que suelen confundirse visualmente (como 0/O o 1/I), pensando en que un cliente pueda transcribir el código sin errores.
 
 La unicidad se refuerza en dos niveles: la columna promoCode tiene una restricción UNIQUE en la base de datos, y en el caso estadísticamente improbable de que se genere un código repetido, el sistema reintenta con un código nuevo antes de fallar.
 
-# DTP-05 — Manejo de errores
+### DTP-05 — Manejo de errores
 
 El manejo de errores se dividió en dos responsabilidades separadas. Por un lado, cada error de negocio distingue un código estable (por ejemplo CUSTOMER_BLOCKED) del mensaje pensado para mostrarse al usuario, de modo que el código pueda usarse de forma confiable en el resto del sistema sin depender del texto exacto del mensaje.
 
