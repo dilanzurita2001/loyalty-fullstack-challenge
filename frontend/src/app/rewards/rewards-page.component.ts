@@ -3,7 +3,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { PointboxApiService } from '../api/pointbox-api.service';
 import { Customer, Reward, WalletSummary, ClaimListItem } from '../api/api.types';
-import { getClaimErrorMessage } from '../api/claim-error.util';
 import { CustomerSelectorComponent } from '../customers/customer-selector.component';
 import { WalletSummaryComponent } from '../wallet/wallet-summary.component';
 import { ClaimsListComponent } from '../claims/claims-list.component';
@@ -43,19 +42,25 @@ export class RewardsPageComponent implements OnInit {
   }
 
   loadCustomers(): void {
-    this.api.getCustomers().subscribe({
-      next:  (customers) => this.customers.set(customers),
-      error: (err)       => console.error('Error loading customers', err),
-    });
+    this.api.getCustomers()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next:  (customers) => this.customers.set(customers),
+        error: (err: Error) => this.lastError.set(err.message),
+      });
   }
 
   loadRewards(): void {
     this.isLoadingRewards.set(true);
-    this.api.getRewards().subscribe({
-      next:     (rewards) => this.rewards.set(rewards),
-      error:    (err)     => console.error('Error loading rewards', err),
-      complete: ()        => this.isLoadingRewards.set(false),
-    });
+    this.api.getRewards()
+      .pipe(
+        finalize(() => this.isLoadingRewards.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  (rewards) => this.rewards.set(rewards),
+        error: (err: Error) => this.lastError.set(err.message),
+      });
   }
 
   loadWallet(): void {
@@ -63,11 +68,15 @@ export class RewardsPageComponent implements OnInit {
     if (!customerId) return;
 
     this.isLoadingWallet.set(true);
-    this.api.getWallet(customerId).subscribe({
-      next:     (wallet) => this.wallet.set(wallet),
-      error:    (err)    => console.error('Error loading wallet', err),
-      complete: ()       => this.isLoadingWallet.set(false),
-    });
+    this.api.getWallet(customerId)
+      .pipe(
+        finalize(() => this.isLoadingWallet.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  (wallet) => this.wallet.set(wallet),
+        error: (err: Error) => this.lastError.set(err.message),
+      });
   }
 
   loadClaims(): void {
@@ -75,11 +84,15 @@ export class RewardsPageComponent implements OnInit {
     if (!customerId) return;
 
     this.isLoadingClaims.set(true);
-    this.api.getClaims(customerId).subscribe({
-      next:     (claims) => this.claims.set(claims),
-      error:    (err)    => console.error('Error loading claims', err),
-      complete: ()       => this.isLoadingClaims.set(false),
-    });
+    this.api.getClaims(customerId)
+      .pipe(
+        finalize(() => this.isLoadingClaims.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next:  (claims) => this.claims.set(claims),
+        error: (err: Error) => this.lastError.set(err.message),
+      });
   }
 
   onCustomerSelected(customerId: string): void {
@@ -117,8 +130,8 @@ export class RewardsPageComponent implements OnInit {
           this.loadRewards();
           this.loadClaims();
         },
-        error: (err) => {
-          this.lastError.set(getClaimErrorMessage(err));
+        error: (err: Error) => {
+          this.lastError.set(err.message);
         },
       });
   }
