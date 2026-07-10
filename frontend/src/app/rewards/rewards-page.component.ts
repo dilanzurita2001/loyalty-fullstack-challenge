@@ -1,6 +1,9 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, signal, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
 import { PointboxApiService } from '../api/pointbox-api.service';
 import { Customer, Reward, WalletSummary, ClaimListItem } from '../api/api.types';
+import { getClaimErrorMessage } from '../api/claim-error.util';
 import { CustomerSelectorComponent } from '../customers/customer-selector.component';
 import { WalletSummaryComponent } from '../wallet/wallet-summary.component';
 import { ClaimsListComponent } from '../claims/claims-list.component';
@@ -20,6 +23,7 @@ import { DecimalPipe } from '@angular/common';
 })
 export class RewardsPageComponent implements OnInit {
   private readonly api = inject(PointboxApiService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly customers          = signal<Customer[]>([]);
   readonly selectedCustomerId = signal<string | null>(null);
@@ -89,7 +93,34 @@ export class RewardsPageComponent implements OnInit {
   }
 
   handleClaim(reward: Reward): void {
-    if (!this.selectedCustomerId()) return;
+    const customerId = this.selectedCustomerId();
+    if (!customerId || this.isClaiming()) return;
+
+    this.isClaiming.set(true);
+    this.lastError.set(null);
+    this.lastClaimCode.set(null);
+
+    this.api
+      .createClaim({
+        customerId,
+        rewardId: reward.id,
+        idempotencyKey: crypto.randomUUID(),
+      })
+      .pipe(
+        finalize(() => this.isClaiming.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (response) => {
+          this.lastClaimCode.set(response.code);
+          this.wallet.update((w) => (w ? { ...w, balance: response.remainingBalance } : w));
+          this.loadRewards();
+          this.loadClaims();
+        },
+        error: (err) => {
+          this.lastError.set(getClaimErrorMessage(err));
+        },
+      });
   }
 
   isRewardAvailable(reward: Reward): boolean {
